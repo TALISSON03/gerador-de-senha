@@ -1,322 +1,69 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gerador de Senhas</title>
-    <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f5f5f5;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            color: #333;
-        }
-        .container {
-            background-color: white;
-            border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-            padding: 30px;
-            width: 400px;
-            max-width: 90%;
-        }
-        h1 {
-            text-align: center;
-            color: #333;
-            margin-bottom: 30px;
-        }
-        .result-container {
-            background-color: #f0f0f0;
-            border-radius: 5px;
-            display: flex;
-            justify-content: space-between;
-            padding: 15px 10px;
-            margin-bottom: 20px;
-        }
-        .result {
-            word-wrap: break-word;
-            max-width: calc(100% - 40px);
-            overflow-y: auto;
-            font-size: 18px;
-            height: 30px;
-            line-height: 30px;
-        }
-        .btn {
-            border: none;
-            background-color: #3b82f6;
-            color: white;
-            padding: 10px 15px;
-            border-radius: 5px;
-            font-size: 16px;
-            cursor: pointer;
-            margin: 5px 0;
-            transition: background-color 0.3s;
-        }
-        .btn:hover {
-            background-color: #2563eb;
-        }
-        .btn-large {
-            display: block;
-            width: 100%;
-            font-size: 18px;
-            padding: 12px 0;
-        }
-        .settings {
-            margin-bottom: 20px;
-        }
-        .setting {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin: 15px 0;
-        }
-        label {
-            font-size: 16px;
-        }
-        input[type="number"] {
-            width: 60px;
-            padding: 5px;
-            font-size: 16px;
-            border-radius: 3px;
-            border: 1px solid #ccc;
-        }
-        input[type="checkbox"] {
-            transform: scale(1.2);
-        }
-        .copy-btn {
-            border: none;
-            background-color: transparent;
-            color: #3b82f6;
-            font-size: 22px;
-            cursor: pointer;
-            transition: color 0.3s;
-        }
-        .copy-btn:hover {
-            color: #2563eb;
-        }
-        .strength-meter {
-            height: 10px;
-            width: 100%;
-            background-color: #ddd;
-            border-radius: 5px;
-            margin-top: 20px;
-            margin-bottom: 10px;
-            position: relative;
-        }
-        .strength-fill {
-            height: 100%;
-            border-radius: 5px;
-            transition: width 0.3s ease, background-color 0.3s ease;
-        }
-        .strength-text {
-            text-align: center;
-            font-size: 14px;
-            margin-bottom: 20px;
-        }
-    </style>
+    <title>Gerador de senha</title>
+    <link rel="stylesheet" href="style.css">
 </head>
-<body>
-    <div class="container">
-        <h1>Gerador de Senhas</h1>
-        
-        <div class="result-container">
-            <span class="result" id="result"></span>
-            <button class="copy-btn" id="copy-btn">📋</button>
-        </div>
-        
-        <div class="strength-meter">
-            <div class="strength-fill" id="strength-fill"></div>
-        </div>
-        <div class="strength-text" id="strength-text">Força da senha</div>
-        
-        <div class="settings">
-            <div class="setting">
-                <label>Comprimento da senha</label>
-                <input type="number" id="length" min="4" max="50" value="12">
-            </div>
-            
-            <div class="setting">
-                <label>Incluir letras maiúsculas</label>
-                <input type="checkbox" id="uppercase" checked>
-            </div>
-            
-            <div class="setting">
-                <label>Incluir letras minúsculas</label>
-                <input type="checkbox" id="lowercase" checked>
-            </div>
-            
-            <div class="setting">
-                <label>Incluir números</label>
-                <input type="checkbox" id="numbers" checked>
-            </div>
-            
-            <div class="setting">
-                <label>Incluir símbolos</label>
-                <input type="checkbox" id="symbols" checked>
-            </div>
-        </div>
-        
-        <button class="btn btn-large" id="generate">Gerar Senha</button>
-    </div>
 
-    <script>
-        // Elementos DOM
-        const resultEl = document.getElementById('result');
-        const lengthEl = document.getElementById('length');
-        const uppercaseEl = document.getElementById('uppercase');
-        const lowercaseEl = document.getElementById('lowercase');
-        const numbersEl = document.getElementById('numbers');
-        const symbolsEl = document.getElementById('symbols');
-        const generateEl = document.getElementById('generate');
-        const copyEl = document.getElementById('copy-btn');
-        const strengthFill = document.getElementById('strength-fill');
-        const strengthText = document.getElementById('strength-text');
-        
-        // Caracteres para gerar a senha
-        const randomFunc = {
-            lower: getRandomLower,
-            upper: getRandomUpper,
-            number: getRandomNumber,
-            symbol: getRandomSymbol
-        };
-        
-        // Eventos
-        generateEl.addEventListener('click', () => {
-            const length = +lengthEl.value;
-            const hasLower = lowercaseEl.checked;
-            const hasUpper = uppercaseEl.checked;
-            const hasNumber = numbersEl.checked;
-            const hasSymbol = symbolsEl.checked;
-            
-            resultEl.innerText = generatePassword(
-                length,
-                hasLower,
-                hasUpper,
-                hasNumber,
-                hasSymbol
-            );
-            
-            updatePasswordStrength();
-        });
-        
-        // Copiar senha
-        copyEl.addEventListener('click', () => {
-            const textarea = document.createElement('textarea');
-            const password = resultEl.innerText;
-            
-            if (!password) {
-                return;
-            }
-            
-            textarea.value = password;
-            document.body.appendChild(textarea);
-            textarea.select();
-            document.execCommand('copy');
-            textarea.remove();
-            
-            alert('Senha copiada para a área de transferência!');
-        });
-        
-        // Gerar senha
-        function generatePassword(length, lower, upper, number, symbol) {
-            let generatedPassword = '';
-            const typesCount = lower + upper + number + symbol;
-            const typesArr = [{ lower }, { upper }, { number }, { symbol }]
-                .filter(item => Object.values(item)[0]);
-            
-            if (typesCount === 0) {
-                return '';
-            }
-            
-            for (let i = 0; i < length; i += typesCount) {
-                typesArr.forEach(type => {
-                    const funcName = Object.keys(type)[0];
-                    generatedPassword += randomFunc[funcName]();
-                });
-            }
-            
-            const finalPassword = generatedPassword.slice(0, length);
-            return shufflePassword(finalPassword);
-        }
-        
-        // Funções para gerar caracteres aleatórios
-        function getRandomLower() {
-            return String.fromCharCode(Math.floor(Math.random() * 26) + 97);
-        }
-        
-        function getRandomUpper() {
-            return String.fromCharCode(Math.floor(Math.random() * 26) + 65);
-        }
-        
-        function getRandomNumber() {
-            return String.fromCharCode(Math.floor(Math.random() * 10) + 48);
-        }
-        
-        function getRandomSymbol() {
-            const symbols = '!@#$%^&*(){}[]=<>/,.';
-            return symbols[Math.floor(Math.random() * symbols.length)];
-        }
-        
-        // Embaralhar a senha gerada
-        function shufflePassword(password) {
-            const array = password.split('');
-            for (let i = array.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [array[i], array[j]] = [array[j], array[i]];
-            }
-            return array.join('');
-        }
-        
-        // Avaliar força da senha
-        function updatePasswordStrength() {
-            const password = resultEl.innerText;
-            let strength = 0;
-            
-            if (password.length >= 8) strength += 20;
-            if (password.length >= 12) strength += 10;
-            if (password.length >= 16) strength += 10;
-            
-            if (/[a-z]/.test(password)) strength += 15;
-            if (/[A-Z]/.test(password)) strength += 15;
-            if (/[0-9]/.test(password)) strength += 15;
-            if (/[^A-Za-z0-9]/.test(password)) strength += 15;
-            
-            // Verificar variedade de caracteres
-            const uniqueChars = new Set(password).size;
-            const uniqueRatio = uniqueChars / password.length;
-            if (uniqueRatio > 0.7) strength += 10;
-            
-            // Limitar a força máxima a 100
-            strength = Math.min(strength, 100);
-            
-            // Atualizar barra de força
-            strengthFill.style.width = `${strength}%`;
-            
-            // Definir cor e texto com base na força
-            if (strength <= 25) {
-                strengthFill.style.backgroundColor = '#ff4d4d';
-                strengthText.innerText = 'Muito fraca';
-            } else if (strength <= 50) {
-                strengthFill.style.backgroundColor = '#ffa64d';
-                strengthText.innerText = 'Fraca';
-            } else if (strength <= 75) {
-                strengthFill.style.backgroundColor = '#ffff4d';
-                strengthText.innerText = 'Média';
-            } else if (strength < 100) {
-                strengthFill.style.backgroundColor = '#4dff4d';
-                strengthText.innerText = 'Forte';
-            } else {
-                strengthFill.style.backgroundColor = '#4dc3ff';
-                strengthText.innerText = 'Muito forte';
-            }
-        }
-        
-        // Gerar senha inicial
-        generateEl.click();
-    </script>
+<body>
+    <section class="conteudo">
+        <div class="conteudo-titulo">
+            <img src="unlock.svg" alt="cadeado fechado">
+            <h2 class="titulo-principal">Gerador de senhas</h2>
+            <h3 class="titulo-secundario">Gere instantaneamente uma senha aleatória e segura</h3>
+        </div>
+        <div class="conteudo-senha">
+            <label for="senha">Senha</label>
+            <input name="senha" type="text" id="campo-senha" readonly>
+        </div>
+        <div class="parametro">
+            <h3 class="parametro-titulo">Personalize sua senha</h3>
+            <div class="parametro-coluna__senha">
+                <div class="parametro-senha">
+                    <h4 class="parametro-senha__titulo">Número de caracteres</h4>
+                    <div class="parametro-senha-botoes">
+                        <button class="parametro-senha__botao">-</button>
+                        <p class="parametro-senha__texto">12</p>
+                        <button class="parametro-senha__botao">+</button>
+                    </div>
+                </div>
+                <div class="parametro-senha">
+                    <h4 class="parametro-senha__titulo">Características da senha</h4>
+                    <div class="parametro-senha-checkbox">
+                        <input name="maiusculo" type="checkbox" class="checkbox" checked>
+                        <label for="maiusculo">Letras maiúsculas</label>
+                    </div>
+                    <div class="parametro-senha-checkbox">
+                        <input name="minusculo" type="checkbox" class="checkbox">
+                        <label for="minusculo">Letras minúsculas</label>
+                    </div>
+                    <div class="parametro-senha-checkbox">
+                        <input name="numero" type="checkbox" class="checkbox">
+                        <label for="numero">Números</label>
+                    </div>
+                    <div class="parametro-senha-checkbox">
+                        <input name="simbolo" type="checkbox" class="checkbox">
+                        <label for="simbolo">Símbolos</label>
+                    </div>
+                </div>
+                <div class="parametro-senha">
+                    <h4 class="parametro-senha__titulo">Força da senha</h4>
+                    <div class="barra"></div>
+                    <div class="forca fraca"></div>
+                    <div class="parametro-senha-textos">
+                        <p>Fraca</p>
+                        <p>Média</p>
+                        <p>Forte</p>
+                    </div>
+                    <p class="entropia"></p>
+                </div>
+            </div>
+        </div>
+    </section>
+    <script src="main.js"></script>
 </body>
+
 </html>
